@@ -3,15 +3,22 @@ import random
 import requests
 import streamlit as st
 
+temp_wo_id = ""
+temp_ip_id = ""
+temp_org_type = ""
+temp_token = ""
+temp_aig_url = ""
+temp_from = ""
+temp_api_key = ""
 
 with st.sidebar:
-    work_order = st.text_input("Work Order ID", key="work_order", value="")
-    installed_product = st.text_input("Installed Product ID", key="installed_product", value="")
-    org_type = st.text_input("Org Type", key="org_type", value="")
-    access_token = st.text_input("Access Token", key="access_token", value="")
-    aig_url = st.text_input("AIG URL", key="aig_url", value="")
-    from_value = st.text_input("From", key="from_value", value="")
-    api_key_value = st.text_input("API Key", key="api_key_value", value="")
+    work_order = st.text_input("Work Order ID", key="work_order", value=temp_wo_id)
+    installed_product = st.text_input("Installed Product ID", key="installed_product", value=temp_ip_id)
+    org_type = st.text_input("Org Type", key="org_type", value=temp_org_type)
+    access_token = st.text_input("Access Token", key="access_token", value=temp_token)
+    aig_url = st.text_input("AIG URL", key="aig_url", value=temp_aig_url)
+    from_value = st.text_input("From", key="from_value", value=temp_from)
+    api_key_value = st.text_input("API Key", key="api_key_value", value=temp_api_key)
 
 st.title("💬 Chatbot")
 
@@ -32,7 +39,7 @@ if user_question := st.chat_input():
     if not access_token:
         st.info("missing access token")
         st.stop()
-  
+
     st.session_state["conversation"].append({
         "talker_id": "me",
         "role": "user",
