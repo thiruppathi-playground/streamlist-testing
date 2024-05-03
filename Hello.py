@@ -3,22 +3,14 @@ import random
 import requests
 import streamlit as st
 
-# https://github.com/streamlit/llm-examples/blob/main/Chatbot.py
-# requirements.txt: requests streamlit
-# Demo Org
-# david.lambert@5544trial.com / Service1
-
-# Nathan Org
-# nathan.ma@verify.com / Svmx1243
-
-TOKEN = "00D0v0000009Vlf!AR4AQJiYUv3wknYO_VOyFDe7Wg_Kmeuhiw2hydojBufmdIcoHl02g.UBp1l.Y23.ZZIRetH0q.KnLfBQMv0gjJ7aU1Ge4hpu"
 
 with st.sidebar:
-    work_order = st.text_input("Work Order ID", key="work_order")#, value="a2PDK0000015fsN2AQ")
-    installed_product = st.text_input("Installed Product ID", key="installed_product", value="a0PDK000003H0Xj2AK")
-    org_type = st.text_input("Org Type", key="org_type", value="Sandbox")
-    access_token = st.text_input("Access Token", key="access_token", value=TOKEN)
-    aig_url = st.text_input("AIG URL", key="aig_url", value="http://localhost:8000/v1/chat/completions")
+    work_order = st.text_input("Work Order ID", key="work_order", value="")
+    installed_product = st.text_input("Installed Product ID", key="installed_product", value="")
+    org_type = st.text_input("Org Type", key="org_type", value="")
+    access_token = st.text_input("Access Token", key="access_token", value="")
+    aig_url = st.text_input("AIG URL", key="aig_url", value="")
+    from_value = st.text_input("from", key="from_value", value="")
 
 st.title("💬 Chatbot")
 
@@ -39,10 +31,7 @@ if user_question := st.chat_input():
     if not access_token:
         st.info("missing access token")
         st.stop()
-    # if not work_order and not installed_product:
-    #     st.info("missing entity")
-    #     st.stop()
-
+  
     st.session_state["conversation"].append({
         "talker_id": "me",
         "role": "user",
@@ -58,7 +47,7 @@ if user_question := st.chat_input():
         'X-Auth-Origin': org_type,
         'X-Auth-Type': 'salesforce',
         'x-conversation-id': str(st.session_state["conversation_id"]),
-        'from': 'SvmxPtc@4450'
+        'from': from_value
     }
     body = {
         "user_message": user_message,
