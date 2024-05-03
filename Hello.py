@@ -1,51 +1,84 @@
-# Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+import random
 
+import requests
 import streamlit as st
-from streamlit.logger import get_logger
 
-LOGGER = get_logger(__name__)
+# https://github.com/streamlit/llm-examples/blob/main/Chatbot.py
+# requirements.txt: requests streamlit
+# Demo Org
+# david.lambert@5544trial.com / Service1
 
+# Nathan Org
+# nathan.ma@verify.com / Svmx1243
 
-def run():
-    st.set_page_config(
-        page_title="Hello",
-        page_icon="👋",
-    )
+TOKEN = "00D0v0000009Vlf!AR4AQJiYUv3wknYO_VOyFDe7Wg_Kmeuhiw2hydojBufmdIcoHl02g.UBp1l.Y23.ZZIRetH0q.KnLfBQMv0gjJ7aU1Ge4hpu"
 
-    st.write("# Welcome to Streamlit! 👋")
+with st.sidebar:
+    work_order = st.text_input("Work Order ID", key="work_order")#, value="a2PDK0000015fsN2AQ")
+    installed_product = st.text_input("Installed Product ID", key="installed_product", value="a0PDK000003H0Xj2AK")
+    org_type = st.text_input("Org Type", key="org_type", value="Sandbox")
+    access_token = st.text_input("Access Token", key="access_token", value=TOKEN)
+    aig_url = st.text_input("AIG URL", key="aig_url", value="http://localhost:8000/v1/chat/completions")
 
-    st.sidebar.success("Select a demo above.")
+st.title("💬 Chatbot")
 
-    st.markdown(
-        """
-        Streamlit is an open-source app framework built specifically for
-        Machine Learning and Data Science projects.
-        **👈 Select a demo from the sidebar** to see some examples
-        of what Streamlit can do!
-        ### Want to learn more?
-        - Check out [streamlit.io](https://streamlit.io)
-        - Jump into our [documentation](https://docs.streamlit.io)
-        - Ask a question in our [community
-          forums](https://discuss.streamlit.io)
-        ### See more complex demos
-        - Use a neural net to [analyze the Udacity Self-driving Car Image
-          Dataset](https://github.com/streamlit/demo-self-driving)
-        - Explore a [New York City rideshare dataset](https://github.com/streamlit/demo-uber-nyc-pickups)
-    """
-    )
+if "conversation" not in st.session_state:
+    st.session_state["conversation"] = []
+    st.session_state["conversation_id"] = random.randint(1, 2_000_000_000)
 
+for msg in st.session_state["conversation"]:
+    st.chat_message(msg["role"]).write(msg["message"])
 
-if __name__ == "__main__":
-    run()
+user_message = {
+    "talker_id": "me",
+    "role": "user",
+    "timestamp": "2024-03-15T11:00:00"
+}
+
+if user_question := st.chat_input():
+    if not access_token:
+        st.info("missing access token")
+        st.stop()
+    # if not work_order and not installed_product:
+    #     st.info("missing entity")
+    #     st.stop()
+
+    st.session_state["conversation"].append({
+        "talker_id": "me",
+        "role": "user",
+        "message": user_question,
+        "timestamp": "2024-03-15T11:00:00"
+    })
+    user_message["message"] = user_question
+    st.chat_message("user").write(user_question)
+
+    headers = {
+        'Authorization': 'Bearer ' + access_token,
+        'Content-Type': 'application/json',
+        'X-Auth-Origin': org_type,
+        'X-Auth-Type': 'salesforce',
+        'x-conversation-id': str(st.session_state["conversation_id"]),
+        'from': 'SvmxPtc@4450'
+    }
+    body = {
+        "user_message": user_message,
+        "conversation": st.session_state.conversation,
+        "context": {
+            "entity": work_order or installed_product,
+            "entity_resource": "SVMXC__Service_Order__c" if work_order else "SVMXC__Installed_Product__c",
+            "conversation_id": st.session_state["conversation_id"]
+        }
+    }
+    response = requests.post(aig_url, headers=headers, json=body, timeout=300)
+    if response.status_code != 200:
+        st.info(f"error response: {response.text}")
+    else:
+        response_message = response.json()["message"]
+        st.session_state["conversation"].append({
+            "talker_id": "ai",
+            "role": "ai",
+            "message": response_message,
+            "timestamp": "2024-03-15T11:00:00"
+        })
+
+        st.chat_message("ai").write(response_message)
