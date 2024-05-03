@@ -10,7 +10,8 @@ with st.sidebar:
     org_type = st.text_input("Org Type", key="org_type", value="")
     access_token = st.text_input("Access Token", key="access_token", value="")
     aig_url = st.text_input("AIG URL", key="aig_url", value="")
-    from_value = st.text_input("from", key="from_value", value="")
+    from_value = st.text_input("From", key="from_value", value="")
+    api_key_value = st.text_input("API Key", key="api_key_value", value="")
 
 st.title("💬 Chatbot")
 
@@ -47,7 +48,8 @@ if user_question := st.chat_input():
         'X-Auth-Origin': org_type,
         'X-Auth-Type': 'salesforce',
         'x-conversation-id': str(st.session_state["conversation_id"]),
-        'from': from_value
+        'from': from_value,
+        'x-api-key': api_key_value,
     }
     body = {
         "user_message": user_message,
