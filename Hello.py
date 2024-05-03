@@ -49,8 +49,7 @@ if user_question := st.chat_input():
         'X-Auth-Type': 'salesforce',
         'x-conversation-id': str(st.session_state["conversation_id"]),
         'from': from_value,
-        'x-api-key': api_key_value,
-        'Cookie': 'INGRESSCOOKIE=2699d6a36586e13ad427129c5b92a45b|aced6e2e632e83afc1571b3c1db86f90'
+        'x-api-key': api_key_value
     }
     body = {
         "user_message": user_message,
